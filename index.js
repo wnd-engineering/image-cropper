@@ -1,42 +1,53 @@
 const express = require('express');
 const app = express();
-const gcs = require('@google-cloud/storage');
 const got = require('got');
-const through = require('through');
-const path = require('path');
 const sharp = require('sharp');
-const http = require("http");
 const stream = require('stream')
 
 app.get('/crop', (req, res) => {
-    const width = req.query.width;
-    const height = req.query.height;
-    const originalLink = req.query["original-link"];
-    const inputStream = got.stream(originalLink);
-    const transformer = sharp().resize(parseInt(width), parseInt(height));
-        // .on('info', function (info) {
-        //     console.log('Image height is ' + info.height);
-        // });
+    const originalLink = req.query["original-link"]
+    if(!originalLink.includes("https://storage.googleapis.com/user-models")) {
+        res.json({"message": "Bad URL"})
+        res.status(204)
+        return
+    }
+    const width = req.query.width
+    const height = req.query.height
+    if(!isNumeric(height) || !isNumeric(width)) {
+        res.json({"message": "Bad parameters"})
+        res.status(204)
+        return
+    }
 
-    const ps = new stream.PassThrough() // <---- this makes a trick with stream error handling
+    res.setHeader('Content-type', 'image/jpeg')
+
+    const inputStream = got.stream(originalLink)
+    const transformer = sharp().resize(parseInt(width), parseInt(height))
+
+    const ps = new stream.PassThrough()
     //Based on: https://stackoverflow.com/questions/17515699/node-express-sending-image-files-as-api-response
     stream.pipeline(
         inputStream,
         transformer,
-        ps, // <---- this makes a trick with stream error handling
+        ps,
         (err) => {
-            //https://stackoverflow.com/questions/21771220/error-handling-with-node-js-streams
             if (err) {
                 console.log(err) // No such file or any other kind of error
-                return res.sendStatus(400);
+                return res.sendStatus(400)
             }
         })
-    ps.pipe(res) // <---- this makes a trick with stream error handling
+    ps.pipe(res)
 });
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
     console.log(`image-cropper: listening on port ${port}`);
 });
+
+function isNumeric(str) {
+    if (typeof str != "string") return false
+    return !isNaN(str) &&
+        !isNaN(parseInt(str))
+}
 
 module.exports = app;
