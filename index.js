@@ -68,7 +68,6 @@ function isNumeric(str) {
 }
 
 //To stop node process from within docker smoothly
-// const process = require('process')
 process.on('SIGINT', () => {
     console.info("Interrupted")
     process.exit(0)
