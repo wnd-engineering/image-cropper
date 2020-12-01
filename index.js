@@ -11,8 +11,11 @@ app.listen(port, () => {
 });
 
 app.get('/crop', (req, res) => {
+    const originalLink = req.query["original-link"]
+    const width = req.query.width
+    const height = req.query.height
 
-    validateInput(req, res)
+    validateInput(req, res, originalLink, width, height)
 
     res.setHeader('Content-type', 'image/jpeg')
 
@@ -34,23 +37,28 @@ app.get('/crop', (req, res) => {
     ps.pipe(res)
 });
 
-function validateInput(req, res) {
-    const originalLink = req.query["original-link"]
+function validateInput(req, res, originalLink, width, height) {
+    let isValid = true
+
     if(!filterLink) {
         res.json({"message": "Misconfigured server"})
         res.status(500)
+        isValid = false
     }
     if(!originalLink.includes(filterLink)) {
         res.json({"message": "Bad URL"})
         res.status(204)
+        isValid = false
     }
-    const width = req.query.width
-    const height = req.query.height
+
     if(!isNumeric(height) || !isNumeric(width)) {
         res.json({"message": "Bad parameters"})
         res.status(204)
+        isValid = false
     }
-    res.end()
+    if(!isValid) {
+        res.end()
+    }
 }
 
 function isNumeric(str) {
