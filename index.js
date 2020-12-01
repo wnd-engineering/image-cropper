@@ -1,23 +1,18 @@
-const express = require('express');
-const app = express();
-const got = require('got');
-const sharp = require('sharp');
+const express = require('express')
+const app = express()
+const got = require('got')
+const sharp = require('sharp')
 const stream = require('stream')
 
+const port = process.env.PORT || 8080
+const filterLink = process.env.FILTER_LINK
+app.listen(port, () => {
+    console.log(`image-cropper: listening on port ${port}`);
+});
+
 app.get('/crop', (req, res) => {
-    const originalLink = req.query["original-link"]
-    if(!originalLink.includes("https://storage.googleapis.com/user-models")) {
-        res.json({"message": "Bad URL"})
-        res.status(204)
-        return
-    }
-    const width = req.query.width
-    const height = req.query.height
-    if(!isNumeric(height) || !isNumeric(width)) {
-        res.json({"message": "Bad parameters"})
-        res.status(204)
-        return
-    }
+
+    validateInput(req, res)
 
     res.setHeader('Content-type', 'image/jpeg')
 
@@ -39,15 +34,36 @@ app.get('/crop', (req, res) => {
     ps.pipe(res)
 });
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-    console.log(`image-cropper: listening on port ${port}`);
-});
+function validateInput(req, res) {
+    const originalLink = req.query["original-link"]
+    if(!filterLink) {
+        res.json({"message": "Misconfigured server"})
+        res.status(500)
+    }
+    if(!originalLink.includes(filterLink)) {
+        res.json({"message": "Bad URL"})
+        res.status(204)
+    }
+    const width = req.query.width
+    const height = req.query.height
+    if(!isNumeric(height) || !isNumeric(width)) {
+        res.json({"message": "Bad parameters"})
+        res.status(204)
+    }
+    res.end()
+}
 
 function isNumeric(str) {
     if (typeof str != "string") return false
     return !isNaN(str) &&
         !isNaN(parseInt(str))
 }
+
+//To stop node process from within docker smoothly
+// const process = require('process')
+process.on('SIGINT', () => {
+    console.info("Interrupted")
+    process.exit(0)
+})
 
 module.exports = app;
