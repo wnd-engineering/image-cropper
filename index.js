@@ -6,6 +6,7 @@ const stream = require('stream')
 
 const port = process.env.PORT || 8080
 const filterLink = process.env.FILTER_LINK
+
 app.listen(port, () => {
     console.log(`image-cropper: listening on port ${port}`);
 });
@@ -17,11 +18,7 @@ let validator = function validatorMiddleware(req, res, next) {
 app.use(validator)
 
 app.get('/crop', (req, res) => {
-    const originalLink = req.query["original-link"]
-    const width = req.query.width
-    const height = req.query.height
-
-    validateInput(req, res, originalLink, width, height)
+    let {originalLink, width, height} = extractParams(req)
 
     res.setHeader('Content-type', 'image/jpeg')
 
