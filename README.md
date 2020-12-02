@@ -24,5 +24,6 @@ Deploy to Cloud Run with mandatory env vars:
     gcloud run deploy image-cropper --image eu.gcr.io/${GCP_PROJECT}/image-cropper:${IMAGE_CROPPER_APP_TAG} --platform managed --allow-unauthenticated --set-env-vars FILTER_LINK=${FILTER_LINK}
 
 After successful deployment create a custom domain mapping if needed:
+
     export YOUR_DOMAIN=your_domain.com
     gcloud beta run domain-mappings create --service image-cropper --domain ${YOUR_DOMAIN}
