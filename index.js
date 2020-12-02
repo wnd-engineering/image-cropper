@@ -5,7 +5,7 @@ const sharp = require('sharp')
 const stream = require('stream')
 
 const port = process.env.PORT || 8080
-const filterLink = process.env.FILTER_LINK
+const filterLink = process.env.FILTER_LINK || ""
 
 app.listen(port, () => {
     console.log(`image-cropper: listening on port ${port}`);
@@ -18,6 +18,7 @@ let validator = function validatorMiddleware(req, res, next) {
 app.use(validator)
 
 app.get('/crop', (req, res) => {
+    res.sendStatus(400)
     let {originalLink, width, height} = extractParams(req)
 
     res.setHeader('Content-type', 'image/jpeg')
@@ -33,7 +34,7 @@ app.get('/crop', (req, res) => {
         ps,
         (err) => {
             if (err) {
-                console.log(err) // No such file or any other kind of error
+                console.log(err.message) // No such file or any other kind of error
                 return res.sendStatus(400)
             }
         })
@@ -42,24 +43,22 @@ app.get('/crop', (req, res) => {
 
 function validateInput(req, res) {
     let isValid = true
+    let errorMessage
 
     let {originalLink, width, height} = extractParams(req)
 
-    if (!filterLink) {
-        res.json({"message": "Misconfigured server"})
-        res.status(500)
-        isValid = false
-    }
     if (!originalLink.includes(filterLink)) {
-        res.json({"message": "Bad URL"})
-        res.status(204)
+        errorMessage = {"message": "Bad URL"}
         isValid = false
     }
 
     if (!isNumeric(height) || !isNumeric(width)) {
-        res.json({"message": "Bad parameters"})
-        res.status(204)
+        errorMessage = {"message": "Bad parameters"}
         isValid = false
+    }
+    if (errorMessage) {
+        res.status(400)
+        res.json(errorMessage)
     }
     return isValid
 }
