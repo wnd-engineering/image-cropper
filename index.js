@@ -1,11 +1,17 @@
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const got = require('got')
 const sharp = require('sharp')
 const stream = require('stream')
 
 const port = process.env.PORT || 8080
 const filterLink = process.env.FILTER_LINK || ""
+const corsOrigin = process.env.CORS_ORIGIN || "*"
+const corsOptions = {
+    origin: corsOrigin,
+    optionsSuccessStatus: 200
+}
 
 app.listen(port, () => {
     console.log(`image-cropper: listening on port ${port}`);
@@ -17,8 +23,7 @@ let validator = function validatorMiddleware(req, res, next) {
 
 app.use(validator)
 
-app.get('/crop', (req, res) => {
-    res.sendStatus(400)
+app.get('/crop',cors(corsOptions), (req, res) => {
     let {originalLink, width, height} = extractParams(req)
 
     res.setHeader('Content-type', 'image/jpeg')
