@@ -1,5 +1,5 @@
 # Image Cropper
-Designed as a middleware that loads the image by the provided URL, but doe not store it anywhere. Unlike a lot of other examples, the cropped image is streamed back to the caller without storing it in a remote location or a local filesystem.
+Designed as a middleware that loads the image by the provided URL, but does not store it anywhere. Unlike a lot of other examples, the cropped image is streamed back to the caller without storing it in a remote location or a local filesystem.
 Image processing is based on a blazingly fast library called `sharp`. It's a lot faster that its counterparts, like `ImageMagick`. What's more, it's more developer friendly and doesn't make you spawn additional processes explicitly in your code.
 Ready-to-use solution for Google Cloud Run, but can run equally well in any other container based infrastructure.
 
