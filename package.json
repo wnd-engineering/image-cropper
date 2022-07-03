@@ -22,7 +22,7 @@
     "got": "^11.8.0",
     "path": "^0.12.7",
     "process": "^0.11.10",
-    "sharp": "^0.26.3",
+    "sharp": "^0.30.5",
     "through": "^2.3.8"
   },
   "devDependencies": {
